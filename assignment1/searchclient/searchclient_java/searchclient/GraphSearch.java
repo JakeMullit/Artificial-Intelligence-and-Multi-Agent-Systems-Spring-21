@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import searchclient.Frontier;
+import searchclient.Heuristic;
+
 public class GraphSearch {
 
     public static Action[][] search(State initialState, Frontier frontier)
@@ -16,10 +19,11 @@ public class GraphSearch {
             //Try to solve a few levels by hand, enter the found solutions below, and run them:
 
             return new Action[][] {
-                {Action.MoveS},
-                {Action.MoveE},
-                {Action.MoveE},
-                {Action.MoveS},
+
+                // {Action.MoveS},
+                // {Action.MoveE},
+                // {Action.MoveE},
+                // {Action.MoveS},
             };
         } else {
             //Part 2:
@@ -48,8 +52,12 @@ public class GraphSearch {
                 if (++iterations % 10000 == 0) {
                     printSearchStatus(explored, frontier);
                 }
+                
+                
 
                 //Your code here...
+                
+
             }
         }
     }

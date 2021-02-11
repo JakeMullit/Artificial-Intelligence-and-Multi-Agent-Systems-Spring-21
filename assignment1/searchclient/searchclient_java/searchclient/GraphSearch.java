@@ -1,11 +1,8 @@
 package searchclient;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-
-import searchclient.Frontier;
-import searchclient.Heuristic;
+import java.util.List;
 
 public class GraphSearch {
 
@@ -18,13 +15,17 @@ public class GraphSearch {
             //The agents will perform the sequence of actions returned by this method.
             //Try to solve a few levels by hand, enter the found solutions below, and run them:
 
-            return new Action[][] {
-
-                // {Action.MoveS},
-                // {Action.MoveE},
-                // {Action.MoveE},
-                // {Action.MoveS},
-            };
+            List<Action[]> actions = new ArrayList<Action[]>();
+            for(var i = 0; i < 2; i++){
+                actions.add(new Action[]{Action.MoveS});
+            }
+            for(var i = 0; i < 10; i++){
+                actions.add(new Action[]{Action.MoveE});
+            }
+            for(var i = 0; i < 2; i++){
+                actions.add(new Action[]{Action.MoveS});
+            }
+            return actions.toArray(new Action[][]{});
         } else {
             //Part 2:
             //Now try to implement the Graph-Search algorithm from R&N figure 3.7
@@ -53,11 +54,24 @@ public class GraphSearch {
                     printSearchStatus(explored, frontier);
                 }
                 
-                
-
                 //Your code here...
-                
+                if(frontier.isEmpty())
+                {
+                    return null; // No solution exists. All possible nodes have been explored.
+                }
 
+                var leafNode = frontier.pop(); 
+                
+                if(leafNode.isGoalState()){
+                    return leafNode.extractPlan();
+                }
+                System.out.println(leafNode.jointAction);
+                explored.add(leafNode);
+                for(var leaf : leafNode.getExpandedStates()){
+                    if(!explored.contains(leaf) && !frontier.contains(leaf) && leaf.jointAction.length == 0){
+                        frontier.add(leaf);
+                    }
+                }
             }
         }
     }

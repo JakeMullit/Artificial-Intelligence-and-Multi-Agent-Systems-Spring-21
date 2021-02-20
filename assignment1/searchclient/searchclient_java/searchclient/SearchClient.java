@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 
+import searchclient.Heuristic.*;
+
 public class SearchClient
 {
     public static State parseLevel(BufferedReader serverMessages)

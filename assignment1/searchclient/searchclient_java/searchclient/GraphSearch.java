@@ -77,24 +77,24 @@ public class GraphSearch {
                     printSearchStatus(explored, frontier);
                 }
                 
-                //Your code here...
-                if(frontier.isEmpty())
-                {
-                    return null; // No solution exists. All possible nodes have been explored.
-                }
+                // //Your code here...
+                // if(frontier.isEmpty())
+                // {
+                //     return null; // No solution exists. All possible nodes have been explored.
+                // }
 
-                var leafNode = frontier.pop(); 
+                // var leafNode = frontier.pop(); 
                 
-                if(leafNode.isGoalState()){
-                    return leafNode.extractPlan();
-                }
-                System.out.println(leafNode.jointAction);
-                explored.add(leafNode);
-                for(var leaf : leafNode.getExpandedStates()){
-                    if(!explored.contains(leaf) && !frontier.contains(leaf) && leaf.jointAction.length == 0){
-                        frontier.add(leaf);
-                    }
-                }
+                // if(leafNode.isGoalState()){
+                //     return leafNode.extractPlan();
+                // }
+                // System.out.println(leafNode.jointAction);
+                // explored.add(leafNode);
+                // for(var leaf : leafNode.getExpandedStates()){
+                //     if(!explored.contains(leaf) && !frontier.contains(leaf) && leaf.jointAction.length == 0){
+                //         frontier.add(leaf);
+                //     }
+                // }
             }
         }
     }

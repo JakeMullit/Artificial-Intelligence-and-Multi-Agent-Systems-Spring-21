@@ -8,19 +8,30 @@ public class GraphSearch {
 
     public static Action[][] search(State initialState, Frontier frontier)
     {
-        boolean outputFixedSolution = true;
+        boolean outputFixedSolution = false;
 
         if (outputFixedSolution) {
             //Part 1:
             //The agents will perform the sequence of actions returned by this method.
             //Try to solve a few levels by hand, enter the found solutions below, and run them:
 
-            return new Action[][] {
+            Action[][] actions = new Action[][]{
+                {Action.MoveS},
                 {Action.MoveS},
                 {Action.MoveE},
                 {Action.MoveE},
+                {Action.MoveE},
+                {Action.MoveE},
+                {Action.MoveE},
+                {Action.MoveE},
+                {Action.MoveE},
+                {Action.MoveE},
+                {Action.MoveE},
+                {Action.MoveE},
                 {Action.MoveS},
+                {Action.MoveS}
             };
+            return actions;
         } else {
             //Part 2:
             //Now try to implement the Graph-Search algorithm from R&N figure 3.7
@@ -43,13 +54,36 @@ public class GraphSearch {
             HashSet<State> explored = new HashSet<>();
 
             while (true) {
-
+                //If the frontier is empty, then it returns a failure
+                if(frontier.isEmpty()){
+                    return null;
+                }
+                //Choose and remove element n from the frontier
+                State n = frontier.pop();
+                //Check if it is a goal state
+                if(n.isGoalState()){
+                    //if so, print the status and return the solution
+                    printSearchStatus(explored, frontier);
+                    System.out.println(Arrays.deepToString(n.extractPlan()));
+                    System.out.println(Arrays.deepToString(n.boxes));
+                    return n.extractPlan();
+                }
+                //If it was not a goal state, then add the state to the explored hashset
+                explored.add(n);
+                //Get an array list of children of n
+                ArrayList<State> children = n.getExpandedStates();
+                //Loop through each child
+                for(int i=0; i<children.size(); i++){
+                    State m = children.get(i);
+                    //If neither the frontier nor explored contain m, then m is added to the frontier
+                    if(!(frontier.contains(m) || explored.contains(m))){
+                        frontier.add(m);
+                    }
+                }
                 //Print a status message every 10000 iteration
                 if (++iterations % 10000 == 0) {
                     printSearchStatus(explored, frontier);
                 }
-
-                //Your code here...
             }
         }
     }

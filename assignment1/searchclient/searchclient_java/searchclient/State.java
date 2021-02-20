@@ -88,13 +88,32 @@ public class State
         {
             Action action = jointAction[agent];
             char box;
-
+            int boxRow;
+            int boxCol;
             switch (action.type)
             {
                 case NoOp:
                     break;
 
                 case Move:
+                    this.agentRows[agent] += action.agentRowDelta;
+                    this.agentCols[agent] += action.agentColDelta;
+                    break;
+                case Push:
+                    boxRow = this.agentRows[agent] + action.agentRowDelta;
+                    boxCol = this.agentCols[agent] + action.agentColDelta;
+                    box = this.boxes[boxRow][boxCol];
+                    this.boxes[boxRow][boxCol] = 0;
+                    this.boxes[boxRow+action.boxRowDelta][boxCol+action.boxColDelta] = box;
+                    this.agentRows[agent] += action.agentRowDelta;
+                    this.agentCols[agent] += action.agentColDelta;
+                    break;
+                case Pull:
+                    boxRow = this.agentRows[agent] - action.boxRowDelta;
+                    boxCol = this.agentCols[agent] - action.boxColDelta;
+                    box = this.boxes[boxRow][boxCol];
+                    this.boxes[boxRow][boxCol] = 0;
+                    this.boxes[boxRow+action.boxRowDelta][boxCol+action.boxColDelta] = box;
                     this.agentRows[agent] += action.agentRowDelta;
                     this.agentCols[agent] += action.agentColDelta;
                     break;
@@ -204,6 +223,8 @@ public class State
         char box;
         int destinationRow;
         int destinationCol;
+        int currBoxRow;
+        int currBoxCol;
         switch (action.type)
         {
             case NoOp:
@@ -213,7 +234,42 @@ public class State
                 destinationRow = agentRow + action.agentRowDelta;
                 destinationCol = agentCol + action.agentColDelta;
                 return this.cellIsFree(destinationRow, destinationCol);
-
+            case Push:
+                destinationRow = agentRow + action.agentRowDelta;
+                destinationCol = agentCol + action.agentColDelta;
+                currBoxRow = destinationRow;
+                currBoxCol = destinationCol;
+                boxRow = currBoxRow + action.boxRowDelta;
+                boxCol = currBoxCol + action.boxColDelta;
+                if(this.containsBox(destinationRow, destinationCol)){
+                    int boxIndex = this.boxAt(destinationRow, destinationCol);
+                    if(boxIndex == -1){
+                        return false;
+                    }
+                    Color boxColor = boxColors[boxIndex];
+                    if(boxColor == agentColor){
+                        return this.cellIsFree(boxRow, boxCol);
+                    }
+                }
+                return false;
+            case Pull:
+                destinationRow = agentRow + action.agentRowDelta;
+                destinationCol = agentCol + action.agentColDelta;
+                currBoxRow = agentRow - action.boxRowDelta;
+                currBoxCol = agentCol - action.boxColDelta;
+                boxRow = destinationRow;
+                boxCol = destinationCol;
+                if(this.containsBox(currBoxRow, currBoxCol)){
+                    int boxIndex = this.boxAt(currBoxRow, currBoxCol);
+                    if(boxIndex == -1){
+                        return false;
+                    }
+                    Color boxColor = boxColors[boxIndex];
+                    if(boxColor == agentColor){
+                        return this.cellIsFree(destinationRow, destinationCol);
+                    } 
+                }
+                return false;
         }
 
         // Unreachable:
@@ -237,6 +293,8 @@ public class State
             int agentCol = this.agentCols[agent];
             int boxRow;
             int boxCol;
+            int currBoxRow;
+            int currBoxCol;
 
             switch (action.type)
             {
@@ -248,6 +306,22 @@ public class State
                     destinationCols[agent] = agentCol + action.agentColDelta;
                     boxRows[agent] = agentRow; // Distinct dummy value
                     boxCols[agent] = agentCol; // Distinct dummy value
+                    break;
+                case Push:
+                    destinationRows[agent] = agentRow + action.agentRowDelta;
+                    destinationCols[agent] = agentCol + action.agentColDelta;
+                    currBoxRow = destinationRows[agent];
+                    currBoxCol = destinationCols[agent];
+                    boxRows[agent] = currBoxRow+action.boxRowDelta;
+                    boxCols[agent] = currBoxCol+action.boxColDelta;
+                    break;
+                case Pull:
+                    destinationRows[agent] = agentRow + action.agentRowDelta;
+                    destinationCols[agent] = agentCol + action.agentColDelta;
+                    currBoxRow = agentRow - action.boxRowDelta;
+                    currBoxCol = agentCol - action.boxColDelta;
+                    boxRows[agent] = destinationRows[agent];
+                    boxCols[agent] = destinationCols[agent];
                     break;
            }
         }
@@ -271,16 +345,37 @@ public class State
                 {
                     return true;
                 }
+                else if (destinationRows[a1] == boxRows[a2] && destinationCols[a1] == boxCols[a2]){
+                    return true;
+                }
+                else if (boxRows[a1] == destinationRows[a2] && boxCols[a1] == destinationCols[a2]){
+                    return true;
+                }
+                else if(boxRows[a1] == boxRows[a2] && boxCols[a1] == boxCols[a2]){
+                    return true;
+                }
+
             }
         }
 
         return false;
     }
 
+    private boolean containsBox(int row, int col){
+        return this.boxes[row][col]!=0;
+
+    }
+    private int boxAt(int row, int col){
+        if(this.boxes[row][col]!=0){
+            return getIndexFromChar(this.boxes[row][col]);
+        }
+        return -1;
+    }
     private boolean cellIsFree(int row, int col)
     {
         return !this.walls[row][col] && this.boxes[row][col] == 0 && this.agentAt(row, col) == 0;
     }
+    
 
     private char agentAt(int row, int col)
     {
@@ -292,6 +387,30 @@ public class State
             }
         }
         return 0;
+    }
+    private int getIndexFromChar(char character){
+        switch(Character.toLowerCase(character)){
+            case 'a':
+                return 0;
+            case 'b':
+                return 1;
+            case 'c':
+                return 2;
+            case 'd':
+                return 3;
+            case 'e':
+                return 4;
+            case 'f':
+                return 5;
+            case 'g':
+                return 6;
+            case 'h':
+                return 7;
+            case 'i':
+                return 8;
+            default:
+                return -1;
+        }
     }
 
     public Action[][] extractPlan()

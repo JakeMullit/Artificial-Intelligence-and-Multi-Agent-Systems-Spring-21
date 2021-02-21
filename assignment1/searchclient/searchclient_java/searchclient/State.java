@@ -100,20 +100,28 @@ public class State
                     this.agentCols[agent] += action.agentColDelta;
                     break;
                 case Push:
+                    //Get the box location
                     boxRow = this.agentRows[agent] + action.agentRowDelta;
                     boxCol = this.agentCols[agent] + action.agentColDelta;
+                    //Get the box char
                     box = this.boxes[boxRow][boxCol];
+                    //Set previous location to 0, and current location to the box char
                     this.boxes[boxRow][boxCol] = 0;
                     this.boxes[boxRow+action.boxRowDelta][boxCol+action.boxColDelta] = box;
+                    //Add delta to the agent location
                     this.agentRows[agent] += action.agentRowDelta;
                     this.agentCols[agent] += action.agentColDelta;
                     break;
                 case Pull:
+                    //Get the box location
                     boxRow = this.agentRows[agent] - action.boxRowDelta;
                     boxCol = this.agentCols[agent] - action.boxColDelta;
+                    //Get the box char
                     box = this.boxes[boxRow][boxCol];
+                    //Set previous location to 0, and current location to the box char
                     this.boxes[boxRow][boxCol] = 0;
                     this.boxes[boxRow+action.boxRowDelta][boxCol+action.boxColDelta] = box;
+                    //Add delta to the agent location
                     this.agentRows[agent] += action.agentRowDelta;
                     this.agentCols[agent] += action.agentColDelta;
                     break;
@@ -235,37 +243,51 @@ public class State
                 destinationCol = agentCol + action.agentColDelta;
                 return this.cellIsFree(destinationRow, destinationCol);
             case Push:
+                //Destination cell of the agent
                 destinationRow = agentRow + action.agentRowDelta;
                 destinationCol = agentCol + action.agentColDelta;
+                //Current box cell, same as the agent destination
                 currBoxRow = destinationRow;
                 currBoxCol = destinationCol;
+                //Destination cell of the box
                 boxRow = currBoxRow + action.boxRowDelta;
                 boxCol = currBoxCol + action.boxColDelta;
+                //if the destination cell contains a box
                 if(this.containsBox(destinationRow, destinationCol)){
+                    //get the box index
                     int boxIndex = this.boxAt(destinationRow, destinationCol);
                     if(boxIndex == -1){
                         return false;
                     }
+                    //check if the colors match
                     Color boxColor = boxColors[boxIndex];
                     if(boxColor == agentColor){
+                        //return if the destination cell of the box is free
                         return this.cellIsFree(boxRow, boxCol);
                     }
                 }
                 return false;
             case Pull:
+                //Destination of the agent
                 destinationRow = agentRow + action.agentRowDelta;
                 destinationCol = agentCol + action.agentColDelta;
+                //Current box location
                 currBoxRow = agentRow - action.boxRowDelta;
                 currBoxCol = agentCol - action.boxColDelta;
-                boxRow = destinationRow;
-                boxCol = destinationCol;
+                //Destination cell of the box, same as the current agent location
+                boxRow = agentRow;
+                boxCol = agentCol;
+                //If the cell contains a box
                 if(this.containsBox(currBoxRow, currBoxCol)){
+                    //get the box index
                     int boxIndex = this.boxAt(currBoxRow, currBoxCol);
                     if(boxIndex == -1){
                         return false;
                     }
+                    //check if the colors match
                     Color boxColor = boxColors[boxIndex];
                     if(boxColor == agentColor){
+                        //return if the destination cell of the agent is free
                         return this.cellIsFree(destinationRow, destinationCol);
                     } 
                 }
@@ -308,20 +330,26 @@ public class State
                     boxCols[agent] = agentCol; // Distinct dummy value
                     break;
                 case Push:
+                    //The destination cell of an agent
                     destinationRows[agent] = agentRow + action.agentRowDelta;
                     destinationCols[agent] = agentCol + action.agentColDelta;
+                    //The current cell of a box
                     currBoxRow = destinationRows[agent];
                     currBoxCol = destinationCols[agent];
+                    //The destination cell of a box
                     boxRows[agent] = currBoxRow+action.boxRowDelta;
                     boxCols[agent] = currBoxCol+action.boxColDelta;
                     break;
                 case Pull:
+                    //The destination cell of an agent
                     destinationRows[agent] = agentRow + action.agentRowDelta;
                     destinationCols[agent] = agentCol + action.agentColDelta;
-                    currBoxRow = agentRow - action.boxRowDelta;
-                    currBoxCol = agentCol - action.boxColDelta;
-                    boxRows[agent] = destinationRows[agent];
-                    boxCols[agent] = destinationCols[agent];
+                    //The destination cell of a box. The same as the current location of the agent
+                    boxRows[agent] = agentRows[agent];
+                    boxCols[agent] = agentCols[agent];
+                    //The current cell of a box. 
+                    currBoxRow = boxRows[agent] - action.boxRowDelta;
+                    currBoxCol = boxCols[agent] - action.boxColDelta;
                     break;
            }
         }
@@ -345,12 +373,15 @@ public class State
                 {
                     return true;
                 }
+                //Agent moving into a box?
                 else if (destinationRows[a1] == boxRows[a2] && destinationCols[a1] == boxCols[a2]){
                     return true;
                 }
+                //A box moving into an agent?
                 else if (boxRows[a1] == destinationRows[a2] && boxCols[a1] == destinationCols[a2]){
                     return true;
                 }
+                //A box moving into a box?
                 else if(boxRows[a1] == boxRows[a2] && boxCols[a1] == boxCols[a2]){
                     return true;
                 }
@@ -361,33 +392,19 @@ public class State
         return false;
     }
 
+    // Method for checking whether a cell contains a box
     private boolean containsBox(int row, int col){
         return this.boxes[row][col]!=0;
 
     }
+    //Method for retrieving the index of the box, based on the row and col it belongs at.
     private int boxAt(int row, int col){
         if(this.boxes[row][col]!=0){
             return getIndexFromChar(this.boxes[row][col]);
         }
         return -1;
     }
-    private boolean cellIsFree(int row, int col)
-    {
-        return !this.walls[row][col] && this.boxes[row][col] == 0 && this.agentAt(row, col) == 0;
-    }
-    
-
-    private char agentAt(int row, int col)
-    {
-        for (int i = 0; i < this.agentRows.length; i++)
-        {
-            if (this.agentRows[i] == row && this.agentCols[i] == col)
-            {
-                return (char) ('0' + i);
-            }
-        }
-        return 0;
-    }
+    //Method for converting a character to an integer. Used to identify the index of the boxes.
     private int getIndexFromChar(char character){
         switch(Character.toLowerCase(character)){
             case 'a':
@@ -411,6 +428,24 @@ public class State
             default:
                 return -1;
         }
+    }
+    private boolean cellIsFree(int row, int col)
+    {
+        return !this.walls[row][col] && this.boxes[row][col] == 0 && this.agentAt(row, col) == 0;
+    }
+    
+    
+
+    private char agentAt(int row, int col)
+    {
+        for (int i = 0; i < this.agentRows.length; i++)
+        {
+            if (this.agentRows[i] == row && this.agentCols[i] == col)
+            {
+                return (char) ('0' + i);
+            }
+        }
+        return 0;
     }
 
     public Action[][] extractPlan()

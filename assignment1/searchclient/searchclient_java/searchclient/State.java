@@ -31,7 +31,7 @@ public class State
     public static boolean[][] walls;
     public char[][] boxes;
     public static char[][] goals;
-    public char[][] passableGoals;
+    public static char[][] passableGoals;
 
     /*
         The box colors are indexed alphabetically. So this.boxColors[0] is the color of A boxes, 
@@ -42,6 +42,8 @@ public class State
     public final State parent;
     public final Action[] jointAction;
     private final int g;
+    private int pp;
+    private int movePenalties;
 
     private int hash = 0;
 
@@ -64,6 +66,9 @@ public class State
         this.parent = null;
         this.jointAction = null;
         this.g = 0;
+        this.pp = 0;
+        this.passableGoals = goals;
+        this.movePenalties = 0;
     }
 
 
@@ -84,6 +89,8 @@ public class State
         this.parent = parent;
         this.jointAction = Arrays.copyOf(jointAction, jointAction.length);
         this.g = parent.g + 1;
+        this.pp = parent.pp;
+        this.movePenalties = parent.movePenalties;
 
         // Apply each action
         int numAgents = this.agentRows.length;
@@ -96,13 +103,17 @@ public class State
             switch (action.type)
             {
                 case NoOp:
+                    this.movePenalties+=1;
                     break;
 
                 case Move:
+                    this.movePenalties+=1;
                     this.agentRows[agent] += action.agentRowDelta;
                     this.agentCols[agent] += action.agentColDelta;
                     break;
                 case Push:
+                    this.pp+=1;
+                    
                     //Get the box location
                     boxRow = this.agentRows[agent] + action.agentRowDelta;
                     boxCol = this.agentCols[agent] + action.agentColDelta;
@@ -114,8 +125,10 @@ public class State
                     //Add delta to the agent location
                     this.agentRows[agent] += action.agentRowDelta;
                     this.agentCols[agent] += action.agentColDelta;
+                    resultCloserToGoal(boxRow, boxCol, boxRow+action.boxRowDelta, boxCol+action.boxColDelta, box);
                     break;
                 case Pull:
+                    this.pp+=1;
                     //Get the box location
                     boxRow = this.agentRows[agent] - action.boxRowDelta;
                     boxCol = this.agentCols[agent] - action.boxColDelta;
@@ -127,6 +140,7 @@ public class State
                     //Add delta to the agent location
                     this.agentRows[agent] += action.agentRowDelta;
                     this.agentCols[agent] += action.agentColDelta;
+                    resultCloserToGoal(boxRow, boxCol, boxRow+action.boxRowDelta, boxCol+action.boxColDelta, box);
                     break;
             }
         }
@@ -135,6 +149,12 @@ public class State
     public int g()
     {
         return this.g;
+    }
+    public int pp(){
+        return this.pp;
+    }
+    public int movePenalties(){
+        return this.movePenalties;
     }
 
     public boolean isGoalState()
@@ -157,6 +177,58 @@ public class State
             }
         }
         return true;
+    }
+    public void resultCloserToGoal(int oldX, int oldY, int newX, int newY, int boxChar){
+        boolean foundGoal = false;
+        for (int row = 1; row < this.goals.length - 1; row++)
+        {
+            for (int col = 1; col < this.goals[row].length - 1; col++)
+            {
+                if(foundGoal == false){
+                char goal = this.goals[row][col];
+                if(boxChar == goal){
+                if ('A' <= goal && goal <= 'Z' && this.boxes[row][col] != goal)
+                {
+                    foundGoal = true;
+                    int changeX = newX - oldX;
+                    int changeY = newY - oldY;
+                    if(row>oldX){
+                        if(changeX>0){
+                            this.movePenalties = this.movePenalties - 1;
+                        }
+                        if(changeX<0){
+                            this.movePenalties = this.movePenalties + 1;
+                        }
+                    }
+                    else if(row<oldX){
+                        if(changeX<0){
+                            this.movePenalties = this.movePenalties - 1;
+                        }
+                        if(changeX>0){
+                            this.movePenalties = this.movePenalties + 1;
+                        }
+                    }
+                    if(col>oldY){
+                        if(changeY>0){
+                            this.movePenalties = this.movePenalties - 1;
+                        }
+                        if(changeY<0){
+                            this.movePenalties = this.movePenalties + 1;
+                        }
+                    }
+                    else if(col<oldY){
+                        if(changeY<0){
+                            this.movePenalties = this.movePenalties - 1;
+                        }
+                        if(changeY>0){
+                            this.movePenalties = this.movePenalties + 1;
+                        }
+                    }
+                }
+                }
+            }
+            }
+        }
     }
 
     public ArrayList<State> getExpandedStates()

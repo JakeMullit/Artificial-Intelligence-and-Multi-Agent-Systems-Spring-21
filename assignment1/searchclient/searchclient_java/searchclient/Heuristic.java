@@ -13,7 +13,8 @@ public abstract class Heuristic
     public int h(State s)
     {
         int numGoals = s.getGoals();
-        return numGoals;
+        int numPP = s.pp();
+        return numGoals + s.movePenalties();
     }
 
     public abstract int f(State s);

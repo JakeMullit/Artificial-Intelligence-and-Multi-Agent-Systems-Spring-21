@@ -1,7 +1,10 @@
 package searchclient;
 
 import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.Stack;
 
 public interface Frontier
@@ -109,28 +112,24 @@ class FrontierDFS
 class FrontierBestFirst
         implements Frontier
 {
-    private Heuristic heuristic;
-    private final ArrayDeque<State> queue = new ArrayDeque<>(65536);
-    //    private final PriorityQueue<State> sortedQueue = new PriorityQueue<State>();
-    private final HashSet<State> set = new HashSet<>(65536);
-
-    public int compareStates(State i, State j){
-        if (i.f_score > j.f_score){
-            return 1;
+    class CustomComparator implements Comparator<State>{
+        @Override
+        public int compare (State s1, State s2){
+            return heuristic.compare(s1, s2);
         }
-        else if(i.f_score < j.f_score){
-            return -1;
-        }
-        else return 0;
     }
+    private Heuristic heuristic;
+    //private final ArrayDeque<State> queue = new ArrayDeque<>(65536);
+        private final PriorityQueue<State> queue;
+    private final HashSet<State> set = new HashSet<>(65536);
+    //private boolean hasSorted = false;
 
 
 
     public FrontierBestFirst(Heuristic h)
     {
         this.heuristic = h;
-
-
+        this.queue = new PriorityQueue<State>(65536, new CustomComparator());
     }
 
     @Override
@@ -143,18 +142,19 @@ class FrontierBestFirst
 //        }
 
 
+       // this.queue.add(state);
         this.queue.add(state);
-//        this.sortedQueue.add(state);
         this.set.add(state);
 
 //        Collections.sort(queue, this.heuristic);
 
-//        Collections.sort(state, heuristic.compare(state, state.getExpandedStates()));
+        //Collections.sort(state, heuristic.compare(state, state.getExpandedStates()));
     }
 
     @Override
     public State pop()
     {
+        
         State state = this.queue.poll();
 //        for(State m : state.getExpandedStates()){
 //            State temp = m;

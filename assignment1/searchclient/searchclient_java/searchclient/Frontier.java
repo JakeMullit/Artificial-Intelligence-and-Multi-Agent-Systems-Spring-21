@@ -112,6 +112,7 @@ class FrontierDFS
 class FrontierBestFirst
         implements Frontier
 {
+    //Implemented custom comparator for use in the priority queue
     class CustomComparator implements Comparator<State>{
         @Override
         public int compare (State s1, State s2){
@@ -119,52 +120,30 @@ class FrontierBestFirst
         }
     }
     private Heuristic heuristic;
-    //private final ArrayDeque<State> queue = new ArrayDeque<>(65536);
-        private final PriorityQueue<State> queue;
+    //Utilizing priority queue
+    private final PriorityQueue<State> queue;
     private final HashSet<State> set = new HashSet<>(65536);
-    //private boolean hasSorted = false;
-
-
 
     public FrontierBestFirst(Heuristic h)
     {
+        //Set the heuristic and the priority queue
         this.heuristic = h;
         this.queue = new PriorityQueue<State>(65536, new CustomComparator());
     }
 
     @Override
+    //Adds the state to the queue and the set
     public void add(State state)
     {
-//        State[] childrenStates = new State[1000];
-//        int i=0;
-//        for(State m : state.getExpandedStates()){
-//            childrenStates[i] = m;
-//        }
-
-
-       // this.queue.add(state);
         this.queue.add(state);
         this.set.add(state);
-
-//        Collections.sort(queue, this.heuristic);
-
-        //Collections.sort(state, heuristic.compare(state, state.getExpandedStates()));
     }
 
     @Override
+    //Polls the state from the priority queue
     public State pop()
     {
-        
         State state = this.queue.poll();
-//        for(State m : state.getExpandedStates()){
-//            State temp = m;
-////            int cost_h = this.heuristic.h(temp);
-//            int temp_g_score = temp.g();
-//            int temp_f_score = temp_g_score + this.heuristic.h(temp);
-//
-//
-//        }
-
         this.set.remove(state);
         return state;
     }

@@ -12,8 +12,10 @@ public abstract class Heuristic
 
     public int h(State s)
     {
+        //Retrieve the goals, numbers of push/pulls and movement penalties
         int numGoals = s.getGoals();
         int numPP = s.pp();
+        //Settled on using goals + movement penalties
         return numGoals + s.movePenalties();
     }
 

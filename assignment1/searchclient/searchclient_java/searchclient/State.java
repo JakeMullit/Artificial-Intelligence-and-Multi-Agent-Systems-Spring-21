@@ -103,7 +103,6 @@ public class State
             switch (action.type)
             {
                 case NoOp:
-                    this.movePenalties+=1;
                     break;
 
                 case Move:
@@ -178,49 +177,65 @@ public class State
         }
         return true;
     }
-    public void resultCloserToGoal(int oldX, int oldY, int newX, int newY, int boxChar){
+    //Method for verifying whether a push/pull resulted in a box being closer to the goal
+    public void resultCloserToGoal(int oldRow, int oldCol, int newRow, int newCol, int boxChar){
         boolean foundGoal = false;
+        //Loop through goals
         for (int row = 1; row < this.goals.length - 1; row++)
         {
             for (int col = 1; col < this.goals[row].length - 1; col++)
             {
+                //If we have found a goal that matches the box character, stop looking for goals and give movement penalties
                 if(foundGoal == false){
                 char goal = this.goals[row][col];
                 if(boxChar == goal){
                 if ('A' <= goal && goal <= 'Z' && this.boxes[row][col] != goal)
                 {
                     foundGoal = true;
-                    int changeX = newX - oldX;
-                    int changeY = newY - oldY;
-                    if(row>oldX){
-                        if(changeX>0){
+                    //The delta of the box movement
+                    int changeRow = newRow - oldRow;
+                    int changeCol = newCol - oldCol;
+                    //If the goal row is higher that than the old box position, that means the box needs to be moved to the right, i.e. delta = 1
+                    if(row>oldRow){
+                        //If the delta is higher, we can remove a penalty point
+                        if(changeRow>0){
                             this.movePenalties = this.movePenalties - 1;
                         }
-                        if(changeX<0){
+                        //If the delta is lower, we add a penalty
+                        if(changeRow<0){
                             this.movePenalties = this.movePenalties + 1;
                         }
                     }
-                    else if(row<oldX){
-                        if(changeX<0){
+                    //If the goal row is smaller than the old box position, that means the box needs to be moved to the left, i.e. delta = -1
+                    else if(row<oldRow){
+                        //If the delta is lower, we can remove a penalty point
+                        if(changeRow<0){
                             this.movePenalties = this.movePenalties - 1;
                         }
-                        if(changeX>0){
+                        //If the delta is higher, we add a penalty
+                        if(changeRow>0){
                             this.movePenalties = this.movePenalties + 1;
                         }
                     }
-                    if(col>oldY){
-                        if(changeY>0){
+                    //If the goal col is higher that than the old box position, that means the box needs to be moved down, i.e. delta = 1
+                    if(col>oldCol){
+                        //If the delta is higher, we can remove a penalty point
+                        if(changeCol>0){
                             this.movePenalties = this.movePenalties - 1;
                         }
-                        if(changeY<0){
+                        //If the delta is lower, we add a penalty
+                        if(changeCol<0){
                             this.movePenalties = this.movePenalties + 1;
                         }
                     }
-                    else if(col<oldY){
-                        if(changeY<0){
+                    //If the goal col is higher that than the old box position, that means the box needs to be moved up, i.e. delta = -1
+                    else if(col<oldCol){
+                        //If the delta is lower, we can remove a penalty point
+                        if(changeCol<0){
                             this.movePenalties = this.movePenalties - 1;
                         }
-                        if(changeY>0){
+                        //If the delta is higher, we add a penalty
+                        if(changeCol>0){
                             this.movePenalties = this.movePenalties + 1;
                         }
                     }
@@ -505,9 +520,11 @@ public class State
         }
     }
 
+    //Method to retrieve the amount of goals
     public int getGoals(){
         int totalGoals = 0;
         char[][] passedGoals = this.passableGoals;
+        //Loop through the goals array and count the goals
         for (int i=0; i < passedGoals.length; i++){
             for (int j=0; j < passedGoals[i].length; j++){
                 char curGoal = passedGoals[i][j];

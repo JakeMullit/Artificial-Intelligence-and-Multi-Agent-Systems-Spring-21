@@ -48,53 +48,30 @@ public class GraphSearch {
             HashSet<State> explored = new HashSet<>();
 
             while (true) {
-                //If the frontier is empty, then it returns a failure
-                if(frontier.isEmpty()){
+                if(frontier==null) {
                     return null;
                 }
-                //Choose and remove element n from the frontier
                 State n = frontier.pop();
-                //Check if it is a goal state
-                if(n.isGoalState()){
-                    //if so, print the status and return the solution
+                if(n.isGoalState()) {
                     printSearchStatus(explored, frontier);
                     return n.extractPlan();
                 }
-                //If it was not a goal state, then add the state to the explored hashset
+
                 explored.add(n);
-                //Get an array list of children of n
-                ArrayList<State> children = n.getExpandedStates();
-                //Loop through each child
-                for(int i=0; i<children.size(); i++){
-                    State m = children.get(i);
-                    //If neither the frontier nor explored contain m, then m is added to the frontier
-                    if(!(frontier.contains(m) || explored.contains(m))){
+
+                for (State m : n.getExpandedStates()) {
+                    if (!frontier.contains(m) && !explored.contains(m)){
                         frontier.add(m);
                     }
                 }
+
                 //Print a status message every 10000 iteration
                 if (++iterations % 10000 == 0) {
                     printSearchStatus(explored, frontier);
                 }
-                
-                // //Your code here...
-                // if(frontier.isEmpty())
-                // {
-                //     return null; // No solution exists. All possible nodes have been explored.
-                // }
 
-                // var leafNode = frontier.pop(); 
-                
-                // if(leafNode.isGoalState()){
-                //     return leafNode.extractPlan();
-                // }
-                // System.out.println(leafNode.jointAction);
-                // explored.add(leafNode);
-                // for(var leaf : leafNode.getExpandedStates()){
-                //     if(!explored.contains(leaf) && !frontier.contains(leaf) && leaf.jointAction.length == 0){
-                //         frontier.add(leaf);
-                //     }
-                // }
+                //Your code here...
+
             }
         }
     }

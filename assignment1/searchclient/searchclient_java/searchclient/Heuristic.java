@@ -12,7 +12,8 @@ public abstract class Heuristic
 
     public int h(State s)
     {
-        throw new NotImplementedException();
+        int numGoals = s.getGoals();
+        return numGoals;
     }
 
     public abstract int f(State s);

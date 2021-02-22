@@ -31,6 +31,7 @@ public class State
     public static boolean[][] walls;
     public char[][] boxes;
     public static char[][] goals;
+    public char[][] passableGoals;
 
     /*
         The box colors are indexed alphabetically. So this.boxColors[0] is the color of A boxes, 
@@ -43,6 +44,8 @@ public class State
     private final int g;
 
     private int hash = 0;
+
+    public int f_score;
 
 
     // Constructs an initial state.
@@ -429,6 +432,27 @@ public class State
                 return -1;
         }
     }
+
+    public int getGoals(){
+        int totalGoals = 0;
+        char[][] passedGoals = this.passableGoals;
+        for (int i=0; i < passedGoals.length; i++){
+            for (int j=0; j < passedGoals[i].length; j++){
+                char curGoal = passedGoals[i][j];
+                if ('A' <= curGoal && curGoal <= 'Z' && this.boxes[i][j] != curGoal)
+                {
+                    totalGoals++;
+                }
+                else if ('0' <= curGoal && curGoal <= '9' &&
+                        !(this.agentRows[curGoal - '0'] == i && this.agentCols[curGoal - '0'] == j))
+                {
+                    totalGoals++;
+                }
+            }
+        }
+        return totalGoals;
+    }
+
     private boolean cellIsFree(int row, int col)
     {
         return !this.walls[row][col] && this.boxes[row][col] == 0 && this.agentAt(row, col) == 0;
